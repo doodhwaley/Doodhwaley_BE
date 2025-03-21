@@ -1,4 +1,5 @@
 const Category = require("../models/Category");
+const Product = require("../models/Product");
 
 const createCategory = async (req, res) => {
   try {
@@ -58,6 +59,28 @@ const getCategories = async (req, res) => {
       .json({ message: "Categories fetched successfully", categories });
   } catch (error) {
     console.error("Get Categories Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getAllProductsByCategory = async (req, res) => {
+  try {
+    const category = await Category.findById(req.params.id);
+    if (!category) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+    const products = await Product.find({ category: category._id });
+    const categoryData = {
+      _id: category._id,
+      name: category.name,
+    };
+    res.status(200).json({
+      message: "Products fetched successfully",
+      products: products,
+      category: categoryData,
+    });
+  } catch (error) {
+    console.error("Get Products By Category Error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -130,4 +153,5 @@ module.exports = {
   getCategories,
   updateCategory,
   deleteCategory,
+  getAllProductsByCategory,
 };
