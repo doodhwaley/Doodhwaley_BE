@@ -6,13 +6,22 @@ const {
   updateCategory,
   deleteCategory,
   getCategories,
+  getAllProductsByCategory,
 } = require("../controllers/categoryController");
 const authMiddleware = require("../middlewares/authMiddleware");
 
-router.post("/createCategory", authMiddleware, createCategory);
+router.get(
+  "/getAllProductsByCategory/:id",
+  authMiddleware,
+  getAllProductsByCategory
+);
 router.get("/getAllCategories", authMiddleware, getCategories);
 router.get("/getCategoryById/:id", authMiddleware, getCategoryById);
+
+router.post("/createCategory", authMiddleware, createCategory);
+
 router.put("/updateCategory/:id", authMiddleware, updateCategory);
+
 router.delete("/deleteCategory/:id", authMiddleware, deleteCategory);
 
 module.exports = router;
