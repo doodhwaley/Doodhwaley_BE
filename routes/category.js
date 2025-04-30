@@ -10,12 +10,8 @@ const {
 } = require("../controllers/categoryController");
 const authMiddleware = require("../middlewares/authMiddleware");
 
-router.get(
-  "/getAllProductsByCategory/:id",
-  authMiddleware,
-  getAllProductsByCategory
-);
-router.get("/getAllCategories", authMiddleware, getCategories);
+router.get("/getAllProductsByCategory/:id", getAllProductsByCategory);
+router.get("/getAllCategories", getCategories);
 router.get("/getCategoryById/:id", authMiddleware, getCategoryById);
 
 router.post("/createCategory", authMiddleware, createCategory);

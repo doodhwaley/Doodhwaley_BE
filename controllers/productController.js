@@ -73,6 +73,31 @@ const getProducts = async (req, res) => {
   }
 };
 
+const getProductsByCategoryName = async (req, res) => {
+  try {
+    const { categoryName } = req.params;
+
+    // First find the category by name
+    const category = await Category.findOne({ name: categoryName });
+
+    if (!category) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    // Then find all products with that category id
+    const products = await Product.find({ category: category._id });
+
+    res.status(200).json({
+      message: "Products fetched successfully",
+      category,
+      products,
+    });
+  } catch (error) {
+    console.error("Get products by category name error:", error);
+    res.status(400).json({ message: error.message });
+  }
+};
+
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -130,4 +155,5 @@ module.exports = {
   updateProduct,
   deleteProduct,
   getProductsByCategory,
+  getProductsByCategoryName,
 };

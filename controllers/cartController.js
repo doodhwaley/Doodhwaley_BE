@@ -135,6 +135,7 @@ const addToCart = async (req, res) => {
 
 // Update cart item
 const updateCartItem = async (req, res) => {
+  console.log("updateCartItem : ", req.body);
   try {
     const userId = req.user.id;
     const { itemId, quantity } = req.body;
@@ -148,6 +149,7 @@ const updateCartItem = async (req, res) => {
 
     // Find cart for user
     const cart = await Cart.findOne({ user: userId });
+
     if (!cart) {
       return res.status(404).json({
         success: false,
@@ -157,9 +159,10 @@ const updateCartItem = async (req, res) => {
 
     // Find item in cart
     const itemIndex = cart.items.findIndex(
-      (item) => item._id.toString() === itemId
+      (item) => item?.product?.toString() === itemId
     );
 
+    console.log("cart items: ", cart, itemId);
     if (itemIndex === -1) {
       return res.status(404).json({
         success: false,
@@ -174,7 +177,6 @@ const updateCartItem = async (req, res) => {
       // Remove item if quantity is 0
       cart.items.splice(itemIndex, 1);
     }
-
     // Recalculate cart totals
     cart.totalAmount = cart.items.reduce(
       (total, item) => total + item.price * item.quantity,
