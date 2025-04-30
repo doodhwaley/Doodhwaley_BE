@@ -5,13 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
-    "build": "npm install --production",
-    "clean": "rm -rf node_modules",
-    "prepare": "npm run build"
-  },
-  "engines": {
-    "node": ">=14.0.0"
+    "dev": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
