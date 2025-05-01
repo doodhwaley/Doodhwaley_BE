@@ -13,7 +13,7 @@ const generateTokens = (userId) => {
 
   // Generate access token with shorter expiry
   const accessToken = jwt.sign(accessPayload, process.env.JWT_SECRET, {
-    expiresIn: "1h",
+    expiresIn: "4d",
   });
 
   // Generate refresh token with longer expiry
