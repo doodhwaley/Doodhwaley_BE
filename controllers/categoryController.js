@@ -3,10 +3,12 @@ const Product = require("../models/Product");
 
 const createCategory = async (req, res) => {
   try {
-    const { name, description, image } = req.body;
-
-    if (!name) {
-      return res.status(400).json({ message: "Category name is required" });
+    const { name, type, description, image } = req.body;
+    console.log("req.body", req.body);
+    if (!name || !type) {
+      return res
+        .status(400)
+        .json({ message: "Category name and type are required" });
     }
 
     const existingCategory = await Category.findOne({ name });
@@ -18,6 +20,7 @@ const createCategory = async (req, res) => {
 
     const category = new Category({
       name,
+      type,
       description,
       image,
       createdBy: req.user._id,
@@ -87,10 +90,12 @@ const getAllProductsByCategory = async (req, res) => {
 
 const updateCategory = async (req, res) => {
   try {
-    const { name, description, image } = req.body;
+    const { name, type, description, image } = req.body;
 
-    if (!name) {
-      return res.status(400).json({ message: "Category name is required" });
+    if (!name || !type) {
+      return res
+        .status(400)
+        .json({ message: "Category name and type are required" });
     }
 
     const existingCategory = await Category.findOne({
@@ -107,6 +112,7 @@ const updateCategory = async (req, res) => {
       req.params.id,
       {
         name,
+        type,
         description,
         image,
         updatedBy: req.user._id,
