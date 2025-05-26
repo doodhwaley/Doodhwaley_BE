@@ -4,8 +4,8 @@ const calculateDeliveriesFromSubscription = (
   selectedDays = [],
   selectedDates = []
 ) => {
-  const year = startDate.getFullYear();
-  const month = startDate.getMonth();
+  const year = new Date(startDate)?.getFullYear();
+  const month = new Date(startDate)?.getMonth();
   const lastDate = new Date(year, month + 1, 0); // last day of month
 
   if (subscriptionType === "daily") {
