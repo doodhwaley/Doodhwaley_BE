@@ -10,7 +10,7 @@ const calculateDeliveriesFromSubscription = (
 
   if (subscriptionType === "daily") {
     // Daily: every day from startDate to month end
-    return lastDate.getDate() - startDate.getDate() + 1;
+    return lastDate.getDate() - new Date(startDate).getDate() + 1;
   }
 
   if (subscriptionType === "weekly") {
