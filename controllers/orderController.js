@@ -5,9 +5,9 @@ const Product = require("../models/Product");
 // Create a new order
 exports.createOrder = async (req, res) => {
   try {
-    const { shippingAddress, paymentMethod } = req.body;
-    const userId = req.user.id;
-
+    const { shippingAddress, paymentMethod, deliveryWindow } = req.body;
+    const userId = req.body.user;
+    console.log("RIZWAN :", req.body);
     // Get user's cart
     const cart = await Cart.findOne({ user: userId }).populate("items.product");
     console.log("user id", cart);
@@ -32,6 +32,7 @@ exports.createOrder = async (req, res) => {
       items: orderItems,
       totalAmount,
       shippingAddress,
+      deliveryWindow,
       paymentMethod,
     });
 
