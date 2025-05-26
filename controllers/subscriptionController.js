@@ -1,5 +1,8 @@
 const Subscription = require("../models/subscription");
 const Order = require("../models/Order");
+const {
+  calculateDeliveriesFromSubscription,
+} = require("../utils/subscriptionUtils");
 
 // Create a new subscription
 exports.createSubscription = async (req, res) => {
