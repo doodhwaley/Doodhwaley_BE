@@ -48,6 +48,62 @@ app.listen(PORT, () => {
   startSubscriptionCron();
 });
 
+// Function to update subscription data with end dates and delivery counts
+// async function updateSubscriptionData() {
+//   try {
+//     const Subscription = require("./models/subscription");
+//     const {
+//       calculateDeliveriesFromSubscription,
+//     } = require("./utils/subscriptionUtils");
+
+//     // Get all subscriptions without endDate or numberOfDeliveries
+//     const subscriptions = await Subscription.find({
+//       $or: [
+//         { endDate: { $exists: false } },
+//         { numberOfDeliveries: { $exists: false } },
+//       ],
+//     });
+
+//     console.log(`Found ${subscriptions.length} subscriptions to update`);
+
+//     for (const subscription of subscriptions) {
+//       const startDate = new Date(subscription.startDate);
+//       const deliveries = calculateDeliveriesFromSubscription(
+//         startDate,
+//         subscription.subscriptionType,
+//         subscription.selectedDays,
+//         subscription.selectedDates
+//       );
+
+//       // Set endDate to last day of the month
+//       const endDate = new Date(
+//         startDate.getFullYear(),
+//         startDate.getMonth() + 1,
+//         0
+//       );
+
+//       // Update subscription
+//       await Subscription.findByIdAndUpdate(subscription._id, {
+//         endDate: endDate,
+//         numberOfDeliveries: deliveries,
+//       });
+
+//       console.log(
+//         `Updated subscription ${subscription._id} with ${deliveries} deliveries`
+//       );
+//     }
+
+//     console.log("Finished updating subscription data");
+//   } catch (error) {
+//     console.error("Error updating subscription data:", error);
+//   }
+// }
+
+// updateSubscriptionData();
+
+// Export the function so it can be called from other files
+// module.exports.updateSubscriptionData = updateSubscriptionData;
+
 // Export for Vercel
 module.exports = app;
 

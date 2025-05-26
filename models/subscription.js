@@ -16,6 +16,10 @@ const subscriptionSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    endDate: {
+      type: Date,
+      required: true,
+    },
     subscriptionType: {
       type: String,
       enum: ["daily", "weekly", "monthly"],
@@ -33,6 +37,14 @@ const subscriptionSchema = new mongoose.Schema(
         default: [],
       },
     ],
+    numberOfDeliveries: {
+      type: Number,
+      required: true,
+    },
+    deliveryWindow: {
+      type: String,
+      required: true,
+    },
     address: {
       type: String,
       required: true,
@@ -53,7 +65,7 @@ const subscriptionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["active", "paused", "cancelled"],
+      enum: ["active", "completed", "cancelled"],
       default: "active",
     },
     lastOrderDate: {
