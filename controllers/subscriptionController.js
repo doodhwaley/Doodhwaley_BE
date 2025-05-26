@@ -23,7 +23,7 @@ exports.createSubscription = async (req, res) => {
 
     const now = new Date();
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    console.log("RIZWAN test 1 req.body", req.body);
+
     const numberOfDeliveries = calculateDeliveriesFromSubscription(
       startDate,
       subscriptionType,
