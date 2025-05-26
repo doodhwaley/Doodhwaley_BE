@@ -36,6 +36,10 @@ const orderSchema = new mongoose.Schema(
       postalCode: String,
       country: String,
     },
+    deliveryWindow: {
+      type: String,
+      required: true,
+    },
     status: {
       type: String,
       enum: ["pending", "processing", "shipped", "delivered", "cancelled"],

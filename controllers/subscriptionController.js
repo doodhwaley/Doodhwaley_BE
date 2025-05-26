@@ -12,11 +12,22 @@ exports.createSubscription = async (req, res) => {
       selectedDays,
       selectedDates,
       address,
+      deliveryWindow,
       additionalNotes,
       productDetails,
     } = req.body;
-    console.log("RIZWAN :: ", req.body);
     // Validate subscription type and corresponding fields
+
+    const now = new Date();
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    console.log("RIZWAN test 1 req.body", req.body);
+    const numberOfDeliveries = calculateDeliveriesFromSubscription(
+      startDate,
+      subscriptionType,
+      selectedDays,
+      selectedDates
+    );
+
     if (
       subscriptionType === "weekly" &&
       (!selectedDays || selectedDays.length === 0)
@@ -39,14 +50,16 @@ exports.createSubscription = async (req, res) => {
       userId,
       productId,
       startDate,
+      endDate: lastDay,
       subscriptionType,
       selectedDays,
       selectedDates,
       address,
+      deliveryWindow,
+      numberOfDeliveries,
       additionalNotes,
       productDetails,
     });
-    console.log("RIZWAN :test: ", subscription);
 
     await subscription.save();
     res.status(201).json(subscription);
@@ -59,7 +72,9 @@ exports.createSubscription = async (req, res) => {
 exports.getUserSubscriptions = async (req, res) => {
   try {
     const { userId } = req.params;
-    const subscriptions = await Subscription.find({ userId });
+    const subscriptions = await Subscription.find({ userId }).populate(
+      "productId"
+    );
     res.json(subscriptions);
   } catch (error) {
     res.status(500).json({ message: error.message });
