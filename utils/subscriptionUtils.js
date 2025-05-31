@@ -10,7 +10,7 @@ const calculateDeliveriesFromSubscription = (
 
   if (subscriptionType === "daily") {
     // Daily: every day from startDate to month end
-    return lastDate.getDate() - new Date(startDate).getDate() + 1;
+    return lastDate.getDate() - new Date(startDate)?.getDate() + 1;
   }
 
   if (subscriptionType === "weekly") {
@@ -19,9 +19,9 @@ const calculateDeliveriesFromSubscription = (
     for (
       let d = new Date(startDate);
       d <= lastDate;
-      d.setDate(d.getDate() + 1)
+      d.setDate(d?.getDate() + 1)
     ) {
-      if (selectedDays.includes(d.getDay())) {
+      if (selectedDays?.includes(d.getDay())) {
         count++;
       }
     }
@@ -30,8 +30,8 @@ const calculateDeliveriesFromSubscription = (
 
   if (subscriptionType === "monthly") {
     // Monthly: count how many selectedDates fall between startDate and month end
-    return selectedDates.reduce((acc, date) => {
-      if (date >= startDate.getDate() && date <= lastDate.getDate()) {
+    return selectedDates?.reduce((acc, date) => {
+      if (date >= startDate?.getDate() && date <= lastDate?.getDate()) {
         return acc + 1;
       }
       return acc;
