@@ -40,10 +40,21 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    deliveryDate: {
+      type: String,
+      required: true,
+    },
     status: {
       type: String,
-      enum: ["pending", "processing", "shipped", "delivered", "cancelled"],
-      default: "pending",
+      enum: [
+        "order_placed",
+        "confirmed",
+        "in_progress",
+        "dispatched",
+        "delivered",
+        "declined",
+      ],
+      default: "order_placed",
     },
     paymentStatus: {
       type: String,
@@ -57,9 +68,6 @@ const orderSchema = new mongoose.Schema(
     orderDate: {
       type: Date,
       default: Date.now,
-    },
-    deliveryDate: {
-      type: Date,
     },
   },
   {
