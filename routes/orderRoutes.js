@@ -7,6 +7,7 @@ const {
   getOrderById,
   updateOrderStatus,
   cancelOrder,
+  getOrderStatusHistory,
 } = require("../controllers/orderController.js");
 
 // Create a new order
@@ -17,6 +18,9 @@ router.get("/my-orders", authMiddleware, getUserOrders);
 
 // Get specific order by ID
 router.get("/:orderId", authMiddleware, getOrderById);
+
+// Get order status history
+router.get("/:orderId/status-history", authMiddleware, getOrderStatusHistory);
 
 // Update order status (admin only)
 router.patch("/:orderId/status", authMiddleware, updateOrderStatus);

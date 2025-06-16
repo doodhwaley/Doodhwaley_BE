@@ -1,13 +1,14 @@
 const Order = require("../models/Order");
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
+const OrderStatus = require("../models/OrderStatus");
 
 // Create a new order
 exports.createOrder = async (req, res) => {
   try {
-    const { shippingAddress, paymentMethod, deliveryWindow } = req.body;
+    const { shippingAddress, paymentMethod, deliveryWindow, deliveryDate } =
+      req.body;
     const userId = req.body.user;
-    console.log("RIZWAN :", req.body);
     // Get user's cart
     const cart = await Cart.findOne({ user: userId }).populate("items.product");
     console.log("user id", cart);
@@ -26,6 +27,8 @@ exports.createOrder = async (req, res) => {
       return total + item.product.price * item.quantity;
     }, 0);
 
+    const currentTime = new Date();
+
     // Create new order
     const order = new Order({
       user: userId,
@@ -33,10 +36,23 @@ exports.createOrder = async (req, res) => {
       totalAmount,
       shippingAddress,
       deliveryWindow,
+      deliveryDate,
       paymentMethod,
+      status: "order_placed",
     });
 
     await order.save();
+
+    // Create initial order status
+    const orderStatus = new OrderStatus({
+      order: order._id,
+      status: "order_placed",
+      changedBy: userId,
+      notes: "Order placed successfully",
+      orderPlacedTime: currentTime,
+    });
+
+    await orderStatus.save();
 
     // Clear the cart after order creation
     cart.items = [];
@@ -45,6 +61,7 @@ exports.createOrder = async (req, res) => {
     res.status(201).json({
       success: true,
       order,
+      status: orderStatus,
     });
   } catch (error) {
     res.status(500).json({
@@ -61,6 +78,7 @@ exports.getUserOrders = async (req, res) => {
     console.log("req.user", req.user);
     const orders = await Order.find({ user: req.user.id })
       .populate("items.product")
+      .populate("user", "name email")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -114,7 +132,7 @@ exports.getOrderById = async (req, res) => {
 // Update order status (for admin)
 exports.updateOrderStatus = async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, notes } = req.body;
     const order = await Order.findById(req.params.orderId);
 
     if (!order) {
@@ -124,9 +142,54 @@ exports.updateOrderStatus = async (req, res) => {
       });
     }
 
+    // Validate status transition
+    const validTransitions = {
+      order_placed: ["confirmed"],
+      confirmed: ["in_progress"],
+      in_progress: ["dispatched"],
+      dispatched: ["delivered"],
+      delivered: [], // No further transitions allowed
+    };
+
+    if (!validTransitions[order.status].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid status transition from ${order.status} to ${status}`,
+      });
+    }
+
+    const currentTime = new Date();
+    const statusUpdate = {
+      order: order._id,
+      status: status,
+      changedBy: req.user._id,
+      notes: notes || `Status changed to ${status}`,
+    };
+
+    // Set the appropriate timestamp based on the status
+    switch (status) {
+      case "confirmed":
+        statusUpdate.confirmedTime = currentTime;
+        break;
+      case "in_progress":
+        statusUpdate.inProgressTime = currentTime;
+        break;
+      case "dispatched":
+        statusUpdate.dispatchedTime = currentTime;
+        break;
+      case "delivered":
+        statusUpdate.deliveredTime = currentTime;
+        break;
+    }
+
+    // Create new order status entry
+    const orderStatus = new OrderStatus(statusUpdate);
+    await orderStatus.save();
+
+    // Update order status
     order.status = status;
     if (status === "delivered") {
-      order.deliveryDate = Date.now();
+      order.deliveryDate = currentTime;
     }
 
     await order.save();
@@ -134,11 +197,49 @@ exports.updateOrderStatus = async (req, res) => {
     res.status(200).json({
       success: true,
       order,
+      statusHistory: orderStatus,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Error updating order status",
+      error: error.message,
+    });
+  }
+};
+
+// Get order status history
+exports.getOrderStatusHistory = async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+
+    const statusHistory = await OrderStatus.find({ order: orderId })
+      .populate("changedBy", "name email")
+      .sort({ createdAt: -1 });
+
+    // Format the response to include all status timestamps
+    const formattedHistory = statusHistory.map((status) => {
+      const statusObj = status.toObject();
+      return {
+        ...statusObj,
+        timestamps: {
+          orderPlaced: status.orderPlacedTime,
+          confirmed: status.confirmedTime,
+          inProgress: status.inProgressTime,
+          dispatched: status.dispatchedTime,
+          delivered: status.deliveredTime,
+        },
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      statusHistory: formattedHistory,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching order status history",
       error: error.message,
     });
   }
@@ -164,13 +265,27 @@ exports.cancelOrder = async (req, res) => {
       });
     }
 
-    // Only allow cancellation of pending or processing orders
-    if (!["pending", "processing"].includes(order.status)) {
+    // Only allow cancellation of order_placed or confirmed orders
+    if (!["order_placed", "confirmed"].includes(order.status)) {
       return res.status(400).json({
         success: false,
         message: "Order cannot be cancelled at this stage",
       });
     }
+
+    const currentTime = new Date();
+
+    // Create cancellation status
+    const orderStatus = new OrderStatus({
+      order: order._id,
+      status: "cancelled",
+      changedBy: req.user._id,
+      notes: "Order cancelled by user",
+      orderPlacedTime: order.orderPlacedTime,
+      confirmedTime: order.confirmedTime,
+    });
+
+    await orderStatus.save();
 
     order.status = "cancelled";
     await order.save();
@@ -179,6 +294,7 @@ exports.cancelOrder = async (req, res) => {
       success: true,
       message: "Order cancelled successfully",
       order,
+      statusHistory: orderStatus,
     });
   } catch (error) {
     res.status(500).json({
