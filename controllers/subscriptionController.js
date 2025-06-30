@@ -16,6 +16,7 @@ exports.createSubscription = async (req, res) => {
       selectedDates,
       address,
       deliveryWindow,
+      paymentMethod,
       additionalNotes,
       productDetails,
     } = req.body;
@@ -60,6 +61,7 @@ exports.createSubscription = async (req, res) => {
       address,
       deliveryWindow,
       numberOfDeliveries,
+      paymentMethod,
       additionalNotes,
       productDetails,
     });
