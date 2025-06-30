@@ -49,6 +49,10 @@ const subscriptionSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    paymentMethod: {
+      type: String,
+      required: true,
+    },
     additionalNotes: {
       type: String,
       default: "",

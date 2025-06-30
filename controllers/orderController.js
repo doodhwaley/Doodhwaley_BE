@@ -258,38 +258,45 @@ exports.cancelOrder = async (req, res) => {
     }
 
     // Check if the order belongs to the user
-    if (order.user.toString() !== req.user._id.toString()) {
+    if (order?.user?.toString() !== req?.user?.id?.toString()) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to cancel this order",
       });
     }
 
-    // Only allow cancellation of order_placed or confirmed orders
-    if (!["order_placed", "confirmed"].includes(order.status)) {
-      return res.status(400).json({
-        success: false,
-        message: "Order cannot be cancelled at this stage",
-      });
-    }
+    // // Only allow cancellation of order_placed or confirmed orders
+    // if (!["order_placed", "confirmed"].includes(order.status)) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Order cannot be cancelled at this stage",
+    //   });
+    // }
 
     const currentTime = new Date();
 
     // Create cancellation status
-    const orderStatus = new OrderStatus({
-      order: order._id,
-      status: "cancelled",
-      changedBy: req.user._id,
-      notes: "Order cancelled by user",
-      orderPlacedTime: order.orderPlacedTime,
-      confirmedTime: order.confirmedTime,
+    const orderStatus = await OrderStatus.findOne({ order: order._id }).sort({
+      createdAt: -1,
     });
+    if (!orderStatus) {
+      return res.status(404).json({
+        success: false,
+        message: "Order status not found",
+      });
+    }
 
+    // Update order status properties
+    orderStatus.status = "declined";
+    orderStatus.declinedTime = currentTime;
+    orderStatus.changedBy = req.user.id;
+    orderStatus.notes = req.body.notes || "Order cancelled by customer";
     await orderStatus.save();
 
-    order.status = "cancelled";
-    await order.save();
+    console.log("orderStatus", orderStatus);
 
+    order.status = "declined";
+    await order.save();
     res.status(200).json({
       success: true,
       message: "Order cancelled successfully",

@@ -45,4 +45,4 @@ const calculateDeliveriesFromSubscription = (
   return 0;
 };
 
-export { calculateDeliveriesFromSubscription };
+module.exports = { calculateDeliveriesFromSubscription };
